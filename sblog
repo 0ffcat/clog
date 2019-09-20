@@ -5,6 +5,20 @@
 # Main bash script for the
 #  simple blog repository.
 
+
+# List Drafts
+  function listdrafts {
+    echo ""
+    echo "Files in Drafts:"
+    count=1
+    for file in /var/www/okju96.xyz/public_html/posts/drafts/* ; do
+      printf "   ${count}: ${file##*/}\n"
+      count=$((${count}+1))
+    done
+    echo ""
+  }  
+  
+
   if [ ${1} = "add" ] ; then 
 # Adding a post    
     if [ ! -z ${2} ] && [ -z ${3} ] ; then
@@ -24,8 +38,13 @@
       echo $posttitle
       vim $posttitle.md
   elif [ ${1} = "post" ] ; then
-
-    echo "Posting post..." 
+    listdrafts
+    printf "Which draft would you like to post? "
+    read posttopost
+    if [[ ${posttopost} = =~ ^[0-9]+$ ]] ; then 
+      echo "You entered a number; good for you!"
+    fi
+    # and then just do it basically
 
 # Else
   else echo "This instruction needs an argument."
