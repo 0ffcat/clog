@@ -20,6 +20,7 @@
   
 
   if [ ${1} = "add" ] ; then 
+
 # Adding a post    
     if [ ! -z ${2} ] && [ -z ${3} ] ; then
       posttitle=${2}
@@ -38,13 +39,28 @@
       echo $posttitle
       vim $posttitle.md
   elif [ ${1} = "post" ] ; then
+
+# Posting a post
     listdrafts
     printf "Which draft would you like to post? "
     read posttopost
-    if [[ ${posttopost} = =~ ^[0-9]+$ ]] ; then 
+    if [[ ${posttopost} =~ ^[0-9]+$ ]] ; then 
       echo "You entered a number; good for you!"
     fi
-    # and then just do it basically
+    if [[ ! ${posttopost} == *".md"* ]] ; then posttopost=${posttopost}.md ; fi
+    echo ${posttopost}
+
+  # Get File
+    ptphtml="$(echo ${posttopost} | cut -d "." -f 1).html"
+    cp /var/www/okju96.xyz/public_html/posts/drafts/${posttopost} \
+       /var/www/okju96.xyz/public_html/posts/drafts/${ptphtml}
+
+  # Convert To HTML
+    ptphtml="/var/www/okju96.xyz/public_html/post/drafts/${ptphtml}"
+    while read -r line ; do
+      echo "${line}"
+    done < "${ptphtml}"
+    exit 0
 
 # Else
   else echo "This instruction needs an argument."
