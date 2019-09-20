@@ -1,0 +1,10 @@
+#!/bin/bash
+
+#              Simple-Blog
+
+# Main bash script for the
+#  simple blog repository.
+
+if [ ${1} = "add" ] ; then 
+  echo "Adding post..."
+fi
