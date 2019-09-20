@@ -5,6 +5,28 @@
 # Main bash script for the
 #  simple blog repository.
 
-if [ ${1} = "add" ] ; then 
-  echo "Adding post..."
-fi
+  if [ ${1} = "add" ] ; then 
+# Adding a post    
+    if [ ! -z ${2} ] && [ -z ${3} ] ; then
+      posttitle=${2}
+    elif [ ! -z ${3} ] ; then
+      echo ""
+      echo "One post at a time please. Additionally, post titles cannot have spaces in them."
+      echo "Dashes are recommended instead (they have SEO benefits over no spaces at all)."
+      echo ""
+      echo "Please try again."
+      echo ""
+      exit 0 
+    else 
+      printf "What would you like to call the post? "
+      read posttitle
+    fi
+      echo $posttitle
+      vim $posttitle.md
+  elif [ ${1} = "post" ] ; then
+
+    echo "Posting post..." 
+
+# Else
+  else echo "This instruction needs an argument."
+  fi
