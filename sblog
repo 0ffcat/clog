@@ -48,39 +48,48 @@
       echo "You entered a number; good for you!"
     fi
     if [[ ! ${posttopost} == *".md"* ]] ; then posttopost=${posttopost}.md ; fi
-    echo ${posttopost}
+    if [ ! -d ${posttopost} ] ; then echo "" ; echo "There has been a fatal error. We can't find the post you're looking for." ; echo "Please try again." ; exit 0 ; fi
 
   # Get File
     ptphtml="$(echo ${posttopost} | cut -d "." -f 1).html"
-    cp /var/www/okju96.xyz/public_html/posts/drafts/${posttopost} \
-       /var/www/okju96.xyz/public_html/posts/drafts/${ptphtml}
-
-  # Convert To HTML
     ptphtml="/var/www/okju96.xyz/public_html/posts/drafts/${ptphtml}"
+
+  # Convert File to HTML
     ul="false"
+    echo "<!--POSTINFO:${ptphtml}-->" > ${ptphtml}
     while read -r line ; do
+      # Heading 3
       if [[ ${line} == *"### "* ]] ; then
-        if [ ${ul} = "true" ] ; then echo "</ul>" >> "file.html" ; ul="false" ; fi
+        if [ ${ul} = "true" ] ; then echo "</ul>" >> ${ptphtml} ; ul="false" ; fi
         h3="### "
-        printf '%s\n' "<h3>${line//$h3/}</h3>" >> "file.html"
+        printf '%s\n' "<h3>${line//$h3/}</h3>" >> ${ptphtml}
+
+      # Heading 2
       elif [[ ${line} == *"## "* ]] ; then
-        if [ ${ul} = "true" ] ; then echo "</ul>" >> "file.html" ; ul="false" ; fi
+        if [ ${ul} = "true" ] ; then echo "</ul>" >> ${ptphtml} ; ul="false" ; fi
         h2="## "
-        printf '%s\n' "<h2>${line//$h2/}</h2>" >> "file.html"
+        printf '%s\n' "<h2>${line//$h2/}</h2>" >> ${ptphtml}
+
+      # Heading 1
       elif [[ ${line} == *"# "* ]] ; then
-        if [ ${ul} = "true" ] ; then echo "</ul>" >> "file.html" ; ul="false" ; fi
+        if [ ${ul} = "true" ] ; then echo "</ul>" >> ${ptphtml} ; ul="false" ; fi
         h1="# "
-        printf '%s\n' "<h1>${line//$h1/}</h1>" >> "file.html"
+        printf '%s\n' "<h1>${line//$h1/}</h1>" >> ${ptphtml}
+        
+      # UL
       elif [[ ${line} == *"- "* ]] ; then
         bulletpoint="- "
-        if [ ${ul} = "false" ] ; then echo "<ul>" >> "file.html" ; fi
+        if [ ${ul} = "false" ] ; then echo "<ul>" >> ${ptphtml} ; fi
         ul="true"
-        printf '%s\n' "<li><p>${line//$bulletpoint/}</p></li>" >> "file.html"
+        printf '%s\n' "<li><p>${line//$bulletpoint/}</p></li>" >> ${ptphtml}
+
+      # Paragraph Standard
       else
-        if [ ${ul} = "true" ] ; then echo "</ul>" >> "file.html" ; ul="false" ; fi
-        echo "<p>${line}</p>" >> "file.html"
+        if [ ${ul} = "true" ] ; then echo "</ul>" >> ${ptphtml} ; ul="false" ; fi
+        echo "<p>${line}</p>" >> ${ptphtml}
+
       fi
-    done < "${ptphtml}"
+    done < "/var/www/okju96.xyz/public_html/posts/drafts/${posttopost}"
 
 # Else
   else echo "This instruction needs an argument."

@@ -18,7 +18,7 @@ ErrorDocument 404 /not-found
 	RewriteRule ^(.*)/$ /$1 [L,R=301]
 
 # https:// AND www.
-#	RewriteCond %{HTTP_HOST} ^wessexelevators\.com
+#	RewriteCond %{HTTP_HOST} ^HOSTNAMEGOESHERE\.com
 #	RewriteRule .* https://www.%{SERVER_NAME}%{REQUEST_URI} [R,L]
 
 # Remove the .php
