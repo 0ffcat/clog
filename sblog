@@ -17,6 +17,16 @@
     done
     echo ""
   }  
+  function configfile {
+    echo "# sblog.conf" > sblog.conf
+    echo "# Don't edit this unless you know" >> sblog.conf
+    echo "# what things do" >> sblog.conf
+    echo "" >> sblog.conf
+    echo "${blogname} ${PWD}" >> sblog.conf
+    echo ""
+    echo "Config file created successfully!"
+    echo "The blog is ready to use."
+  }
   
 
   if [ ${1} = "add" ] ; then 
@@ -100,6 +110,38 @@
     mv "/var/www/okju96.xyz/public_html/posts/drafts/${posttopost}" "/var/www/okju96.xyz/public_html/posts/published/${posttopost}" 
     mv ${ptphtml} /var/www/okju96.xyz/public_html/posts
 
+# Setup
+  elif [ ${1} = "setup" ] ; then
+    # New Setup / Wipe Current
+    if [ ! -f sblog.conf ] || [[ ${2} = "reset" ]] ; then 
+      configfile
+    # Add Blog
+    elif [[ ${2} = "add" ]] ; then # I don't know why double brackets work here
+      echo "${blogname} ${PWD}" >> sblog.conf
+    # No Args, Reset Or Add
+    else 
+      exitloop=false
+      while [ $exitloop = false ] ; do
+        echo "Do you want to add a blog or reset the whole current config?"
+        echo "    1 to add a blog"
+        echo "    2 to reset"
+        echo "    c to cancel"
+        read resetaddcancel
+        if [ $resetaddcancel = "1" ] ; then
+          echo "1"
+          exitloop=true
+        elif [ $resetaddcancel = "2" ] ; then
+          echo "2" 
+          exitloop=true
+        elif [ $resetaddcancel = "c" ] || [ $resetaddcancel = "C" ] ; then
+          echo "cancelled"
+          exit 0
+        fi 
+        echo ""
+      done
+    fi
+
+    
 # Else
   else echo "This instruction needs an argument."
   fi
