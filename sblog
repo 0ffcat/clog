@@ -48,7 +48,7 @@
       echo "You entered a number; good for you!"
     fi
     if [[ ! ${posttopost} == *".md"* ]] ; then posttopost=${posttopost}.md ; fi
-    if [ ! -z "/var/www/okju96.xyz/posts/drafts/${posttopost}" ] ; then
+    if [ ! -f "/var/www/okju96.xyz/public_html/posts/drafts/${posttopost}" ] ; then
       echo "" 
       echo "There has been a fatal error. We can't find the post you're looking for." 
       echo "Please try again." 
