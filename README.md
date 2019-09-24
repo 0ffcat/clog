@@ -17,4 +17,7 @@ Mini-project to create a simple blog with PHP and Bash.
 
 `sblog post` allows you to select which draft post you want to post
 
+## Todo
 
+- [ ] Multiple instances
+- [ ] Better data for each post
