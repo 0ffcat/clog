@@ -14,13 +14,13 @@
     usort($files, function($a, $b) {return filemtime($a) < filemtime($b);});
 
           foreach($files as $file) {
-            $file_name = substr($file, 41);
-            $file = substr($file, 35);
+            $file_name = substr($file, 38);
+            $file = substr($file, 31);
     ?>
 
         <div class="files">
           <div>
-          <a href="<?php print $file; ?>">
+          <a href="<?php print "$file"; ?>">
 
     <?php
             print $file_name . "\n";

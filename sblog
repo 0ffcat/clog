@@ -37,7 +37,7 @@
       read posttitle
     fi
       echo $posttitle
-      vim $posttitle.md
+      vim "/var/www/okju96.xyz/public_html/posts/drafts/$posttitle.md"
   elif [ ${1} = "post" ] ; then
 
 # Posting a post
@@ -98,7 +98,7 @@
 
     if [ ! -d "/var/www/okju96.xyz/public_html/posts/published" ] ; then mkdir "/var/www/okju96.xyz/public_html/posts/published" ; fi
     mv "/var/www/okju96.xyz/public_html/posts/drafts/${posttopost}" "/var/www/okju96.xyz/public_html/posts/published/${posttopost}" 
-    mv ${ptphtml} ../.
+    mv ${ptphtml} /var/www/okju96.xyz/public_html/posts
 
 # Else
   else echo "This instruction needs an argument."
