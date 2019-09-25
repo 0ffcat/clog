@@ -1,0 +1,147 @@
+#!/bin/bash
+
+#              Simple-Blog
+
+# Main bash script for the
+#  simple blog repository.
+
+
+# List Drafts
+  function listdrafts {
+    echo ""
+    echo "Files in Drafts:"
+    count=1
+    for file in /var/www/okju96.xyz/public_html/posts/drafts/* ; do
+      printf "   ${count}: ${file##*/}\n"
+      count=$((${count}+1))
+    done
+    echo ""
+  }  
+  function configfile {
+    echo "# sblog.conf" > sblog.conf
+    echo "# Don't edit this unless you know" >> sblog.conf
+    echo "# what things do" >> sblog.conf
+    echo "" >> sblog.conf
+    echo "${blogname} ${PWD}" >> sblog.conf
+    echo ""
+    echo "Config file created successfully!"
+    echo "The blog is ready to use."
+  }
+  
+
+  if [ ${1} = "add" ] ; then 
+
+# Adding a post    
+    if [ ! -z ${2} ] && [ -z ${3} ] ; then
+      posttitle=${2}
+    elif [ ! -z ${3} ] ; then
+      echo ""
+      echo "One post at a time please. Additionally, post titles cannot have spaces in them."
+      echo "Dashes are recommended instead (they have SEO benefits over no spaces at all)."
+      echo ""
+      echo "Please try again."
+      echo ""
+      exit 0 
+    else 
+      printf "What would you like to call the post? "
+      read posttitle
+    fi
+      echo $posttitle
+      vim "/var/www/okju96.xyz/public_html/posts/drafts/$posttitle.md"
+  elif [ ${1} = "post" ] ; then
+
+# Posting a post
+    listdrafts
+    printf "Which draft would you like to post? "
+    read posttopost
+    if [[ ${posttopost} =~ ^[0-9]+$ ]] ; then 
+      echo "You entered a number; good for you!"
+    fi
+    if [[ ! ${posttopost} == *".md"* ]] ; then posttopost=${posttopost}.md ; fi
+    if [ ! -f "/var/www/okju96.xyz/public_html/posts/drafts/${posttopost}" ] ; then
+      echo "" 
+      echo "There has been a fatal error. We can't find the post you're looking for." 
+      echo "Please try again." 
+      exit 0 
+    fi
+
+  # Get File
+    ptphtml="$(echo ${posttopost} | cut -d "." -f 1).html"
+    ptphtml="/var/www/okju96.xyz/public_html/posts/drafts/${ptphtml}"
+
+  # Convert File to HTML
+    ul="false"
+    echo "<!--POSTINFO:${ptphtml}-->" > ${ptphtml}
+    while read -r line ; do
+      # Heading 3
+      if [[ ${line} == *"### "* ]] ; then
+        if [ ${ul} = "true" ] ; then echo "</ul>" >> ${ptphtml} ; ul="false" ; fi
+        h3="### "
+        printf '%s\n' "<h3>${line//$h3/}</h3>" >> ${ptphtml}
+
+      # Heading 2
+      elif [[ ${line} == *"## "* ]] ; then
+        if [ ${ul} = "true" ] ; then echo "</ul>" >> ${ptphtml} ; ul="false" ; fi
+        h2="## "
+        printf '%s\n' "<h2>${line//$h2/}</h2>" >> ${ptphtml}
+
+      # Heading 1
+      elif [[ ${line} == *"# "* ]] ; then
+        if [ ${ul} = "true" ] ; then echo "</ul>" >> ${ptphtml} ; ul="false" ; fi
+        h1="# "
+        printf '%s\n' "<h1>${line//$h1/}</h1>" >> ${ptphtml}
+        
+      # UL
+      elif [[ ${line} == *"- "* ]] ; then
+        bulletpoint="- "
+        if [ ${ul} = "false" ] ; then echo "<ul>" >> ${ptphtml} ; fi
+        ul="true"
+        printf '%s\n' "<li><p>${line//$bulletpoint/}</p></li>" >> ${ptphtml}
+
+      # Paragraph Standard
+      else
+        if [ ${ul} = "true" ] ; then echo "</ul>" >> ${ptphtml} ; ul="false" ; fi
+        echo "<p>${line}</p>" >> ${ptphtml}
+
+      fi
+    done < "/var/www/okju96.xyz/public_html/posts/drafts/${posttopost}"
+
+    if [ ! -d "/var/www/okju96.xyz/public_html/posts/published" ] ; then mkdir "/var/www/okju96.xyz/public_html/posts/published" ; fi
+    mv "/var/www/okju96.xyz/public_html/posts/drafts/${posttopost}" "/var/www/okju96.xyz/public_html/posts/published/${posttopost}" 
+    mv ${ptphtml} /var/www/okju96.xyz/public_html/posts
+
+# Setup
+  elif [ ${1} = "setup" ] ; then
+    # New Setup / Wipe Current
+    if [ ! -f sblog.conf ] || [[ ${2} = "reset" ]] ; then 
+      configfile
+    # Add Blog
+    elif [[ ${2} = "add" ]] ; then # I don't know why double brackets work here
+      echo "${blogname} ${PWD}" >> sblog.conf
+    # No Args, Reset Or Add
+    else 
+      exitloop=false
+      while [ $exitloop = false ] ; do
+        echo "Do you want to add a blog or reset the whole current config?"
+        echo "    1 to add a blog"
+        echo "    2 to reset"
+        echo "    c to cancel"
+        read resetaddcancel
+        if [ $resetaddcancel = "1" ] ; then
+          echo "1"
+          exitloop=true
+        elif [ $resetaddcancel = "2" ] ; then
+          echo "2" 
+          exitloop=true
+        elif [ $resetaddcancel = "c" ] || [ $resetaddcancel = "C" ] ; then
+          echo "cancelled"
+          exit 0
+        fi 
+        echo ""
+      done
+    fi
+
+    
+# Else
+  else echo "This instruction needs an argument."
+  fi
