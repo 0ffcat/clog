@@ -9,26 +9,17 @@
 # List Drafts
   function listdrafts {
     echo ""
-    echo "Files in Drafts:"
+    printf "Files in Drafts: \n "
     count=1
-    for file in /var/www/okju96.xyz/public_html/posts/drafts/* ; do
+    for file in posts/drafts/* ; do
       printf "   ${count}: ${file##*/}\n"
       count=$((${count}+1))
     done
     echo ""
   }  
-  function configfile {
-    echo "# sblog.conf" > sblog.conf
-    echo "# Don't edit this unless you know" >> sblog.conf
-    echo "# what things do" >> sblog.conf
-    echo "" >> sblog.conf
-    echo "${blogname} ${PWD}" >> sblog.conf
-    echo ""
-    echo "Config file created successfully!"
-    echo "The blog is ready to use."
-  }
-  
 
+
+# MAIN
   if [ ${1} = "add" ] ; then 
 
 # Adding a post    
@@ -47,27 +38,36 @@
       read posttitle
     fi
       echo $posttitle
-      vim "/var/www/okju96.xyz/public_html/posts/drafts/$posttitle.md"
+      vim "posts/drafts/$posttitle.md"
   elif [ ${1} = "post" ] ; then
 
 # Posting a post
-    listdrafts
-    printf "Which draft would you like to post? "
-    read posttopost
-    if [[ ${posttopost} =~ ^[0-9]+$ ]] ; then 
-      echo "You entered a number; good for you!"
-    fi
-    if [[ ! ${posttopost} == *".md"* ]] ; then posttopost=${posttopost}.md ; fi
-    if [ ! -f "/var/www/okju96.xyz/public_html/posts/drafts/${posttopost}" ] ; then
-      echo "" 
-      echo "There has been a fatal error. We can't find the post you're looking for." 
-      echo "Please try again." 
-      exit 0 
-    fi
+    while true ; do
+      listdrafts
+      printf "Which draft would you like to post? "
+      read posttopost
+      echo ${posttopost}
+      reg='^[0-9]+$' 
+      if [[ ${posttopost} =~ ${reg} ]] ; then 
+        echo "$(listdrafts)" > ./tmp
+        posttopost="1"
+        posttopost=$(grep "${posttopost}:" "./tmp" | \
+                     cut -d':' -f2 | cut -d' ' -f2)
+        rm ./tmp
+      fi
+      if [[ ! ${posttopost} == *".md"* ]] ; then posttopost=${posttopost}.md ; fi
+      if [ ! -f "posts/drafts/${posttopost}" ] ; then
+        echo "" 
+        echo "There has been an error. We can't find the post you're looking for." 
+        echo "Please try again."
+      else
+        break
+      fi
+    done 
 
   # Get File
     ptphtml="$(echo ${posttopost} | cut -d "." -f 1).html"
-    ptphtml="/var/www/okju96.xyz/public_html/posts/drafts/${ptphtml}"
+    ptphtml="posts/drafts/${ptphtml}"
 
   # Convert File to HTML
     # It's not well written at the moment
@@ -124,45 +124,13 @@
         echo "<p>${line}</p>" >> ${ptphtml}
 
       fi
-    done < "/var/www/okju96.xyz/public_html/posts/drafts/${posttopost}"
+    done < "posts/drafts/${posttopost}"
 
   # Moving .html To Correct Place
-    if [ ! -d "/var/www/okju96.xyz/public_html/posts/published" ] ; then mkdir "/var/www/okju96.xyz/public_html/posts/published" ; fi
-    mv "/var/www/okju96.xyz/public_html/posts/drafts/${posttopost}" "/var/www/okju96.xyz/public_html/posts/published/${posttopost}" 
-    mv ${ptphtml} /var/www/okju96.xyz/public_html/posts
+    if [ ! -d "posts/published" ] ; then mkdir "posts/published" ; fi
+    mv "posts/drafts/${posttopost}" "posts/published/${posttopost}" 
+    mv ${ptphtml} posts
 
-# Setup
-  elif [ ${1} = "setup" ] ; then
-    # New Setup / Wipe Current
-    if [ ! -f sblog.conf ] || [[ ${2} = "reset" ]] ; then 
-      configfile
-    # Add Blog
-    elif [[ ${2} = "add" ]] ; then # I don't know why double brackets work here
-      echo "${blogname} ${PWD}" >> sblog.conf
-    # No Args, Reset Or Add
-    else 
-      exitloop=false
-      while [ $exitloop = false ] ; do
-        echo "Do you want to add a blog or reset the whole current config?"
-        echo "    1 to add a blog"
-        echo "    2 to reset"
-        echo "    c to cancel"
-        read resetaddcancel
-        if [ $resetaddcancel = "1" ] ; then
-          echo "1"
-          exitloop=true
-        elif [ $resetaddcancel = "2" ] ; then
-          echo "2" 
-          exitloop=true
-        elif [ $resetaddcancel = "c" ] || [ $resetaddcancel = "C" ] ; then
-          echo "cancelled"
-          exit 0
-        fi 
-        echo ""
-      done
-    fi
-
-    
 # Else
   else echo "This instruction needs an argument."
   fi
