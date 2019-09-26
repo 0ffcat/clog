@@ -70,11 +70,31 @@
     ptphtml="/var/www/okju96.xyz/public_html/posts/drafts/${ptphtml}"
 
   # Convert File to HTML
+    # It's not well written at the moment
+    # but it is functional
     ul="false"
     echo "<!--POSTINFO:${ptphtml}-->" > ${ptphtml}
     while read -r line ; do
+      # Heading 6
+      if [[ ${line} == *"###### "* ]] ; then
+        if [ ${ul} = "true" ] ; then echo "</ul>" >> ${ptphtml} ; ul="false" ; fi
+        h6="###### "
+        printf '%s\n' "<h6>${line//$h6/}</h6>" >> ${ptphtml}
+
+      # Heading 5
+      elif [[ ${line} == *"##### "* ]] ; then
+        if [ ${ul} = "true" ] ; then echo "</ul>" >> ${ptphtml} ; ul="false" ; fi
+        h5="##### "
+        printf '%s\n' "<h5>${line//$h5/}</h5>" >> ${ptphtml}
+
+      # Heading 4
+      elif [[ ${line} == *"#### "* ]] ; then
+        if [ ${ul} = "true" ] ; then echo "</ul>" >> ${ptphtml} ; ul="false" ; fi
+        h4="#### "
+        printf '%s\n' "<h4>${line//$h4/}</h4>" >> ${ptphtml}
+
       # Heading 3
-      if [[ ${line} == *"### "* ]] ; then
+      elif [[ ${line} == *"### "* ]] ; then
         if [ ${ul} = "true" ] ; then echo "</ul>" >> ${ptphtml} ; ul="false" ; fi
         h3="### "
         printf '%s\n' "<h3>${line//$h3/}</h3>" >> ${ptphtml}
@@ -106,6 +126,7 @@
       fi
     done < "/var/www/okju96.xyz/public_html/posts/drafts/${posttopost}"
 
+  # Moving .html To Correct Place
     if [ ! -d "/var/www/okju96.xyz/public_html/posts/published" ] ; then mkdir "/var/www/okju96.xyz/public_html/posts/published" ; fi
     mv "/var/www/okju96.xyz/public_html/posts/drafts/${posttopost}" "/var/www/okju96.xyz/public_html/posts/published/${posttopost}" 
     mv ${ptphtml} /var/www/okju96.xyz/public_html/posts
