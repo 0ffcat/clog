@@ -13,19 +13,19 @@
     count=1
     for file in posts/drafts/* ; do
       printf "   ${count}: ${file##*/}\n"
-      count=$((${count}+1))
+      count=$((count+1))
     done
     echo ""
   }  
 
 
 # MAIN
-  if [ ${1} = "add" ] ; then 
+  if [[ ${1} = "add" ]] || [[ ${1} = "new" ]] ; then 
 
 # Adding a post    
-    if [ ! -z ${2} ] && [ -z ${3} ] ; then
+    if [[ ! -z ${2} ]] && [[ -z ${3} ]] ; then
       posttitle=${2}
-    elif [ ! -z ${3} ] ; then
+    elif [[ ! -z ${3} ]] ; then
       echo ""
       echo "One post at a time please. Additionally, post titles cannot have spaces in them."
       echo "Dashes are recommended instead (they have SEO benefits over no spaces at all)."
@@ -35,21 +35,24 @@
       exit 0 
     else 
       printf "What would you like to call the post? "
-      read posttitle
+      read -r posttitle
     fi
-      echo $posttitle
+      echo "$posttitle"
       vim "posts/drafts/$posttitle.md"
-  elif [ ${1} = "post" ] ; then
+
+
+  elif [[ ${1} = "post" ]] ; then
 
 # Posting a post
     while true ; do
       listdrafts
       printf "Which draft would you like to post? "
-      read posttopost
-      echo ${posttopost}
+      read -r posttopost
+      echo "${posttopost}"
       reg='^[0-9]+$' 
       if [[ ${posttopost} =~ ${reg} ]] ; then 
-        echo "$(listdrafts)" > ./tmp
+        listdrafts > ./tmp
+#       echo "$(listdrafts)" > ./tmp
         posttopost="1"
         posttopost=$(grep "${posttopost}:" "./tmp" | \
                      cut -d':' -f2 | cut -d' ' -f2)
@@ -66,62 +69,66 @@
     done 
 
   # Get File
-    ptphtml="$(echo ${posttopost} | cut -d "." -f 1).html"
+    ptphtml="$(echo "${posttopost}" | cut -d "." -f 1).html"
     ptphtml="posts/drafts/${ptphtml}"
 
   # Convert File to HTML
     # It's not well written at the moment
     # but it is functional
     ul="false"
-    echo "<!--POSTINFO:${ptphtml}-->" > ${ptphtml}
+    echo "<!--POSTINFO:${ptphtml}-->" > "${ptphtml}"
     while read -r line ; do
+
+      # Skip if empty line
+      if [[ -z ${line} ]] ; then continue ; fi
+
       # Heading 6
       if [[ ${line} == *"###### "* ]] ; then
-        if [ ${ul} = "true" ] ; then echo "</ul>" >> ${ptphtml} ; ul="false" ; fi
+        if [[ ${ul} = "true" ]] ; then echo "</ul>" >> "${ptphtml}" ; ul="false" ; fi
         h6="###### "
-        printf '%s\n' "<h6>${line//$h6/}</h6>" >> ${ptphtml}
+        printf '%s\n' "<h6>${line//$h6/}</h6>" >> "${ptphtml}"
 
       # Heading 5
       elif [[ ${line} == *"##### "* ]] ; then
-        if [ ${ul} = "true" ] ; then echo "</ul>" >> ${ptphtml} ; ul="false" ; fi
+        if [[ ${ul} = "true" ]] ; then echo "</ul>" >> "${ptphtml}" ; ul="false" ; fi
         h5="##### "
-        printf '%s\n' "<h5>${line//$h5/}</h5>" >> ${ptphtml}
+        printf '%s\n' "<h5>${line//$h5/}</h5>" >> "${ptphtml}"
 
       # Heading 4
       elif [[ ${line} == *"#### "* ]] ; then
-        if [ ${ul} = "true" ] ; then echo "</ul>" >> ${ptphtml} ; ul="false" ; fi
+        if [[ ${ul} = "true" ]] ; then echo "</ul>" >> "${ptphtml}" ; ul="false" ; fi
         h4="#### "
-        printf '%s\n' "<h4>${line//$h4/}</h4>" >> ${ptphtml}
+        printf '%s\n' "<h4>${line//$h4/}</h4>" >> "${ptphtml}"
 
       # Heading 3
       elif [[ ${line} == *"### "* ]] ; then
-        if [ ${ul} = "true" ] ; then echo "</ul>" >> ${ptphtml} ; ul="false" ; fi
+        if [[ ${ul} = "true" ]] ; then echo "</ul>" >> "${ptphtml}" ; ul="false" ; fi
         h3="### "
-        printf '%s\n' "<h3>${line//$h3/}</h3>" >> ${ptphtml}
+        printf '%s\n' "<h3>${line//$h3/}</h3>" >> "${ptphtml}"
 
       # Heading 2
       elif [[ ${line} == *"## "* ]] ; then
-        if [ ${ul} = "true" ] ; then echo "</ul>" >> ${ptphtml} ; ul="false" ; fi
+        if [[ ${ul} = "true" ]] ; then echo "</ul>" >> "${ptphtml}" ; ul="false" ; fi
         h2="## "
-        printf '%s\n' "<h2>${line//$h2/}</h2>" >> ${ptphtml}
+        printf '%s\n' "<h2>${line//$h2/}</h2>" >> "${ptphtml}"
 
       # Heading 1
       elif [[ ${line} == *"# "* ]] ; then
-        if [ ${ul} = "true" ] ; then echo "</ul>" >> ${ptphtml} ; ul="false" ; fi
+        if [[ ${ul} = "true" ]] ; then echo "</ul>" >> "${ptphtml}" ; ul="false" ; fi
         h1="# "
-        printf '%s\n' "<h1>${line//$h1/}</h1>" >> ${ptphtml}
+        printf '%s\n' "<h1>${line//$h1/}</h1>" >> "${ptphtml}"
         
       # UL
       elif [[ ${line} == *"- "* ]] ; then
         bulletpoint="- "
-        if [ ${ul} = "false" ] ; then echo "<ul>" >> ${ptphtml} ; fi
+        if [[ ${ul} = "false" ]] ; then echo "<ul>" >> "${ptphtml}" ; fi
         ul="true"
-        printf '%s\n' "<li><p>${line//$bulletpoint/}</p></li>" >> ${ptphtml}
+        printf '%s\n' "<li><p>${line//$bulletpoint/}</p></li>" >> "${ptphtml}"
 
       # Paragraph Standard
       else
-        if [ ${ul} = "true" ] ; then echo "</ul>" >> ${ptphtml} ; ul="false" ; fi
-        echo "<p>${line}</p>" >> ${ptphtml}
+        if [[ ${ul} = "true" ]] ; then echo "</ul>" >> "${ptphtml}" ; ul="false" ; fi
+        echo "<p>${line}</p>" >> "${ptphtml}"
 
       fi
     done < "posts/drafts/${posttopost}"
@@ -129,8 +136,8 @@
   # Moving .html To Correct Place
     if [ ! -d "posts/published" ] ; then mkdir "posts/published" ; fi
     mv "posts/drafts/${posttopost}" "posts/published/${posttopost}" 
-    mv ${ptphtml} posts
+    mv "${ptphtml}" posts
 
 # Else
-  else echo "This instruction needs an argument."
+  else echo "This instruction needs a valid argument."
   fi
