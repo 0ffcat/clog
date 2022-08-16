@@ -2,6 +2,11 @@
 
 # Clog: Command Line blOG
 
+<p float="left">
+  <img src=".github/light.png" width="200" />
+  <img src=".github/dark.png" width="200" />
+</p>
+
 A static site generator written in Perl. Posts written in markdown.
 URL's are formatted /posts/YYYY-mm-dd-title-of-post.html. It makes it really
 nice to update a blog from the web server
