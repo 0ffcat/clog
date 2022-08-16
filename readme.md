@@ -3,8 +3,9 @@
 # Clog: Command Line blOG
 
 <p float="left">
-  <img src=".github/light.png" width="200" />
-  <img src=".github/dark.png" width="200" />
+  <img alt="Example image of the clog website, light theme version." src=".github/light.png" width="45%" />
+  &nbsp; &nbsp; &nbsp; &nbsp;
+  <img alt="Example image of the clog website, dark themed version" src=".github/dark.png" width="45%" />
 </p>
 
 A static site generator written in Perl. Posts written in markdown.
